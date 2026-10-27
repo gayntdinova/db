@@ -1,6 +1,9 @@
 using System;
 using System.Linq;
 using Game.Domain;
+using MongoDB.Driver;
+using Tests;
+
 
 namespace ConsoleApp
 {
@@ -12,7 +15,7 @@ namespace ConsoleApp
 
         private Program(string[] args)
         {
-            userRepo = new InMemoryUserRepository();
+            userRepo = new MongoUserRepository(CreateMain());
             gameRepo = new InMemoryGameRepository();
         }
 
@@ -182,6 +185,14 @@ namespace ConsoleApp
             var players = game.Players;
             // TODO: Показать информацию про 5 последних туров: кто как ходил и кто в итоге выиграл. Прочитать эту информацию из IGameTurnRepository
             Console.WriteLine($"Score: {players[0].Name} {players[0].Score} : {players[1].Score} {players[1].Name}");
+        }
+        
+        private static IMongoDatabase CreateMain()
+        {
+            var mongoConnectionString = Environment.GetEnvironmentVariable("PROJECT5100_MONGO_CONNECTION_STRING")
+                                        ?? "mongodb://localhost:27017?maxConnecting=100";
+            var mongoClient = new MongoClient(mongoConnectionString);
+            return mongoClient.GetDatabase("game-main");
         }
     }
 }
